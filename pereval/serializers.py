@@ -25,7 +25,7 @@ class LevelSerializer(WritableNestedModelSerializer):
 class ImagesSerializer(WritableNestedModelSerializer):
     class Meta:
         model = Images
-        fields = ('data', 'title')
+        fields = ("data", "title")
 
 
 class PerevalSerializer(WritableNestedModelSerializer):
