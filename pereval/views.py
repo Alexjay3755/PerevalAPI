@@ -32,6 +32,7 @@ class ImagesViewSet(ModelViewSet):
 class PerevalViewSet(ModelViewSet):
     queryset = Pereval.objects.all()
     serializer_class = PerevalSerializer
+    http_method_names = ['get', 'post', 'patch']
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -51,6 +52,24 @@ class PerevalViewSet(ModelViewSet):
                 {"status": 500, 'message': f"Ошибка подключения к базе данных: {str(e)}", "id": None},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
+    def partial_update(self, request, *args, **kwargs):
+        pereval = self.get_object()
+        serializer = self.get_serializer(pereval, data=request.data, partial=True)
+        if pereval.status != "new":
+            return Response(
+                {"state": 0, "message": f"Некорректный статус: <>{pereval.get_status_display()}<>"},
+                status=status.HTTP_200_OK
+            )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(
+            {"state": 1, "message": "Перевал успешно обновлён"},
+            status=status.HTTP_200_OK
+        )
+
 
 
 
