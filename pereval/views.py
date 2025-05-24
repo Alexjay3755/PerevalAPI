@@ -1,5 +1,6 @@
 from django.db import DatabaseError
 from django.forms.models import model_to_dict
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
@@ -10,7 +11,7 @@ from pereval.serializers import (
     PerevalSerializer, ImagesSerializer
 )
 from .utils import incorrect_status_response, not_edit_user_response, incorrect_user_data, ok_response
-
+from .yasg import user_email, example_pereval, pereval_status
 
 class UserViewSet(ModelViewSet):
     queryset = User.objects.all()
@@ -38,6 +39,7 @@ class PerevalViewSet(ModelViewSet):
     http_method_names = ['get', 'post', 'patch']
     filterset_fields = ('user__email', 'status')
 
+    @swagger_auto_schema(request_body=example_pereval)
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         try:
@@ -57,6 +59,7 @@ class PerevalViewSet(ModelViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
+    @swagger_auto_schema(request_body=example_pereval)
     def partial_update(self, request, *args, **kwargs):
         pereval = self.get_object()
         serializer = self.get_serializer(pereval, data=request.data, partial=True)
@@ -73,3 +76,7 @@ class PerevalViewSet(ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return ok_response()
+
+    @swagger_auto_schema(manual_parameters=[user_email, pereval_status], )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
