@@ -34,6 +34,7 @@ class PerevalViewSet(ModelViewSet):
     queryset = Pereval.objects.all()
     serializer_class = PerevalSerializer
     http_method_names = ['get', 'post', 'patch']
+    filterset_fields = ["user__email"]
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -50,7 +51,7 @@ class PerevalViewSet(ModelViewSet):
             )
         except DatabaseError as e:
             return Response(
-                {"status": 500, 'message': f"Ошибка подключения к базе данных: {str(e)}", "id": None},
+                {"status": 500, 'message': f"Ошибка подключения к базе username данных: {str(e)}", "id": None},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
@@ -70,7 +71,6 @@ class PerevalViewSet(ModelViewSet):
                 {"state": 0, "message": "Данные пользователя измениять нельзя!"},
                 status=status.HTTP_409_CONFLICT
             )
-
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(
