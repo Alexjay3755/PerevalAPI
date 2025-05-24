@@ -1,13 +1,15 @@
+from django.db import DatabaseError
 from django.forms.models import model_to_dict
 from rest_framework import status
-from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
-from django.db import DatabaseError
-from .models import User,Coords, Level, Images, Pereval
-from .serializers import (
+from rest_framework.viewsets import ModelViewSet
+
+from pereval.models import User, Coords, Level, Pereval, Images
+from pereval.serializers import (
     UserSerializer, CoordsSerializer, LevelSerializer,
-    ImagesSerializer, PerevalSerializer
+    PerevalSerializer, ImagesSerializer
 )
+from .utils import incorrect_status_response, not_edit_user_response, incorrect_user_data, ok_response
 
 
 class UserViewSet(ModelViewSet):
@@ -34,7 +36,7 @@ class PerevalViewSet(ModelViewSet):
     queryset = Pereval.objects.all()
     serializer_class = PerevalSerializer
     http_method_names = ['get', 'post', 'patch']
-    filterset_fields = ["user__email"]
+    filterset_fields = ('user__email', 'status')
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -51,33 +53,23 @@ class PerevalViewSet(ModelViewSet):
             )
         except DatabaseError as e:
             return Response(
-                {"status": 500, 'message': f"Ошибка подключения к базе username данных: {str(e)}", "id": None},
+                {"status": 500, 'message': f"Ошибка подключения к базе данных: {str(e)}", "id": None},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-
 
     def partial_update(self, request, *args, **kwargs):
         pereval = self.get_object()
         serializer = self.get_serializer(pereval, data=request.data, partial=True)
+
         if pereval.status != "new":
-            return Response(
-                {"state": 0, "message": f"Некорректный статус: <>{pereval.get_status_display()}<>"},
-                status=status.HTTP_409_CONFLICT
-            )
+            return incorrect_status_response(pereval)
+
         user_dict = model_to_dict(pereval.user)
-        user_dict.pop("id")
-        if request.data.get("user") and request.data.get("user") != user_dict:
-            return Response(
-                {"state": 0, "message": "Данные пользователя измениять нельзя!"},
-                status=status.HTTP_409_CONFLICT
-            )
+        user_dict.pop('id')
+        user_data = request.data.get("user")
+        if incorrect_user_data(user_data, user_dict):
+            return not_edit_user_response()
+
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(
-            {"state": 1, "message": "Перевал успешно обновлён"},
-            status=status.HTTP_200_OK
-        )
-
-
-
-
+        return ok_response()
