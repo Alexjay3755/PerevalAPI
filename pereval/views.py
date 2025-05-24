@@ -1,3 +1,4 @@
+from django.forms.models import model_to_dict
 from rest_framework import status
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
@@ -60,7 +61,14 @@ class PerevalViewSet(ModelViewSet):
         if pereval.status != "new":
             return Response(
                 {"state": 0, "message": f"Некорректный статус: <>{pereval.get_status_display()}<>"},
-                status=status.HTTP_200_OK
+                status=status.HTTP_409_CONFLICT
+            )
+        user_dict = model_to_dict(pereval.user)
+        user_dict.pop("id")
+        if request.data.get("user") and request.data.get("user") != user_dict:
+            return Response(
+                {"state": 0, "message": "Данные пользователя измениять нельзя!"},
+                status=status.HTTP_409_CONFLICT
             )
 
         serializer.is_valid(raise_exception=True)
