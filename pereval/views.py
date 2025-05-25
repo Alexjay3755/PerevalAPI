@@ -13,6 +13,7 @@ from pereval.serializers import (
 from .utils import (
     incorrect_status_response, not_edit_user_response,
     incorrect_user_data, update_ok_response, bad_request_response, create_ok_response, database_error_response,
+    check_unique_model_data, check_unique_model_data_response
 )
 from .yasg import user_email, example_pereval, pereval_status
 
@@ -46,6 +47,11 @@ class PerevalViewSet(ModelViewSet):
     @swagger_auto_schema(request_body=example_pereval)
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
+        user_data = request.data.get('user')
+        fields = ["email", "phone"]
+        check_unique_model, field = check_unique_model_data(user_data, User, fields)
+        if not check_unique_model:
+            return check_unique_model_data_response(field)
         try:
             if not serializer.is_valid():
                 return bad_request_response(serializer)
