@@ -17,14 +17,17 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
+from .yasg import urlpatterns as yasg_urls
 
-
-from pereval.views import PerevalViewSet
+from pereval.views import PerevalViewSet, UserViewSet
 
 router = routers.DefaultRouter()
-router.register(r'pereval', PerevalViewSet)
+router.register(r'pereval', PerevalViewSet, basename='pereval')
+router.register(r'users', UserViewSet, basename='users')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
 ]
+
+urlpatterns += yasg_urls
