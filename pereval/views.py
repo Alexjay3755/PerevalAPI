@@ -15,13 +15,17 @@ from .utils import (
     incorrect_user_data, update_ok_response, bad_request_response, create_ok_response, database_error_response,
     check_unique_model_data, check_unique_model_data_response
 )
-from .yasg import user_email, example_pereval, pereval_status
+from .yasg import user_email, example_pereval, pereval_status, user_name
 
 
 class UserViewSet(ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    filterset_fields = ('name',)
 
+    @swagger_auto_schema(manual_parameters=[user_name], )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 class CoordsViewSet(ModelViewSet):
     queryset = Coords.objects.all()

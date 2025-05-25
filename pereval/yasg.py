@@ -13,6 +13,13 @@ pereval_status = openapi.Parameter(
 )
 
 
+user_name = openapi.Parameter(
+    'name', openapi.IN_QUERY,
+    description="Поиск пользователей по имени",
+    type=openapi.TYPE_STRING
+)
+
+
 example_pereval = openapi.Schema(
     type=openapi.TYPE_OBJECT,
     properties={
