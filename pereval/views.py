@@ -10,8 +10,12 @@ from pereval.serializers import (
     UserSerializer, CoordsSerializer, LevelSerializer,
     PerevalSerializer, ImagesSerializer
 )
-from .utils import incorrect_status_response, not_edit_user_response, incorrect_user_data, ok_response
+from .utils import (
+    incorrect_status_response, not_edit_user_response,
+    incorrect_user_data, update_ok_response, bad_request_response, create_ok_response, database_error_response,
+)
 from .yasg import user_email, example_pereval, pereval_status
+
 
 class UserViewSet(ModelViewSet):
     queryset = User.objects.all()
@@ -44,20 +48,11 @@ class PerevalViewSet(ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         try:
             if not serializer.is_valid():
-                return Response(
-                    {"status": 400, "message": serializer.errors, "id": None},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+                return bad_request_response(serializer)
             serializer.save()
-            return Response(
-                {"status": 200, "message": None, "id": serializer.instance.id},
-                status=status.HTTP_200_OK
-            )
+            return create_ok_response(serializer)
         except DatabaseError as e:
-            return Response(
-                {"status": 500, 'message': f"Ошибка подключения к базе данных: {str(e)}", "id": None},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            return database_error_response(e)
 
     @swagger_auto_schema(request_body=example_pereval)
     def partial_update(self, request, *args, **kwargs):
@@ -75,7 +70,7 @@ class PerevalViewSet(ModelViewSet):
 
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return ok_response()
+        return update_ok_response()
 
     @swagger_auto_schema(manual_parameters=[user_email, pereval_status], )
     def list(self, request, *args, **kwargs):
