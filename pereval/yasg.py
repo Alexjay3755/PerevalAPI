@@ -12,8 +12,8 @@ pereval_status = openapi.Parameter(
     type=openapi.TYPE_STRING
 )
 
-user_name = openapi.Parameter(
-    'name', openapi.IN_QUERY,
+user_fam = openapi.Parameter(
+    'fam', openapi.IN_QUERY,
     description="Поиск перевалов по статусу",
     type=openapi.TYPE_STRING
 )
