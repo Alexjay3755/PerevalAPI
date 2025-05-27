@@ -14,10 +14,10 @@ class Coords(models.Model):
 
 
 class Level(models.Model):
-    winter = models.CharField(max_length=255, null=True)
-    summer = models.CharField(max_length=255, null=True)
-    autumn = models.CharField(max_length=255, null=True)
-    spring = models.CharField(max_length=255, null=True)
+    winter = models.CharField(max_length=255, null=True, blank=True)
+    summer = models.CharField(max_length=255, null=True, blank=True)
+    autumn = models.CharField(max_length=255, null=True, blank=True)
+    spring = models.CharField(max_length=255, null=True, blank=True)
 
 
 class Pereval(models.Model):
