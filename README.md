@@ -189,7 +189,6 @@ ______
 
 ***Отчет о покрытии тестами:***
 
-
-
+![2025-05-26_09-03-04](https://github.com/user-attachments/assets/93b3f90d-34cf-4e9c-9d9d-74b7d83dc443)
 
 
